@@ -14,37 +14,34 @@ If stuff works fine, ignore every warning or weird stuff you don't recognize.
 Code still sucks"""
 
 PATH = "C:/Program Files (x86)/chromedriver.exe" # I used Chrome, but if you have the driver for other browsers, specify the path here
-						                         # Also works with Brave, just need to specify it's path
+						                         # Also works with Brave, just need to specify it's path and enable it.
 
-brave_path = "C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe"
-
+brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
 options = webdriver.ChromeOptions()
 #options.binary_location = brave_path # Uncomment to use Brave Browser
-# option.add_argument("--incognito") # OPTIONAL
+#options.add_argument("--incognito") # OPTIONAL, remove the first # to enable incognito mode
+options.add_argument('log-level=3')
 options.headless = False
-
-
+noGUI = options.headless
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear') # Just to make stuff uncluttered
 
 def main():
-    driver = webdriver.Chrome(executable_path=PATH, chrome_options=options)
+    driver = webdriver.Chrome(executable_path=PATH, options=options)
     def lyrics(): # Search for song lyrics using Genius.com
         cls()
-
+        """
+        THIS WHOLE LYRIC THING WORKS LIKE 50/50, WHY DOES IT WORK? I DON'T KNOW. WHY DOESN'T IT WORK? I DON'T KNOW. WHY IS IT LIKE THIS? I DON'T KNOW
+        FUCK THIS I'LL START SELLING HOTDOGS
+        """
         inp = input("Name of the song to get lyrics: ")
-        driver.get("https://genius.com") # Website used for song lyrics, if you change this, you must also change the "input","mini_card" and "lyrics" class to match with other websites's class
-        src = driver.find_element_by_tag_name("input") # Genius's search bar class
-        src.send_keys(inp) # Type the song into the search bar
-        src.send_keys(Keys.ENTER) # Send "Enter" key
-        time.sleep(10) # Sometimes it loads so slow, the program can't find the top result, giving an error. This little slow down is to make sure everything is loaded first
-        driver.find_element_by_class_name("mini_card-info").click() # First result class on Genius.com
+        driver.get("https://genius.com/search?q="+inp) # Website used for song lyrics
+        Find = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.CLASS_NAME, "mini_card"))) # Sometimes it loads so slow, the program can't find the top result, giving an error. This will wait a max of 20 seconds for everything to load before proceding.
+        Find.click()
         try:
-            lyric = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "lyrics")) # Same thing like "mini_card" here, just more easier to do, could've done both but am lazy
-                )
-            print("[!]------------------Lyrics below------------------[!]","\n",lyric.text) # Some random text might be printed before the actual lyrics, just a headsup
+            lyric = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "lyrics")))
+            print("[!]------------------Lyrics below------------------[!]","\n",lyric.text)
         except Exception as e:
             print(e)
             driver.quit()
@@ -55,22 +52,13 @@ def main():
     def scors(): # Gets a user profile from osu!
         cls()
         usr = str(input("Please input a valid osu! username: "))
-        driver.get("https://osu.ppy.sh/users/" + usr)
+        driver.get("https://osu.ppy.sh/users/"+usr)
         print(driver.title, '\n')
 
         try:
-            ranks = driver.find_elements_by_class_name("value-display__value") # Osu changed shit with the web so I had to find a new way to display ranks
-            print("Global Rank: ", '\n', ranks[0].text) #Global ranks
+            ranks = driver.find_elements_by_class_name("value-display.value-display--large") # Osu changed shit with the web so I had to find a new way to display ranks
+            print('\n', ranks[0].text) #Global ranks
             print('_____________', '\n')
-            print("Local Rank: ", '\n', ranks[1].text) #Local ranks
-            print('_____________', '\n')
-
-            h = 2
-            while h < 5:
-                print(ranks[h].text) # This is for the extra stuff I am too lazy to write it
-                print('_____________', '\n')
-                h += 1
-
 
             stats = driver.find_elements_by_class_name("profile-header") #Entire osu! stats
             for i in stats:
@@ -83,29 +71,34 @@ def main():
             else:
                 pass
 
-            print("Song Ranks Machine Broke, idk how 2 fix, am dum","\n","_________","\n")
-            """
+            
             # idk what they've done, or I'm just stupid, but I can no longer get the ranks on profiles (S,A,SS,Silver SS)
-            k = 0
-            scores_ranks = driver.find_elements_by_class_name("profile-rank-count")
+            # second comment: its fixed, why? I don't know, it's stupid, not me.
+            # third comment: It's not fixed, GUI dependent. Works without.
+            if noGUI == True:
+                print("Ranks","\n")
+                k = 0
+                scores_ranks = driver.find_elements_by_class_name("profile-rank-count__item")
 
-            while k < 5:
-                if k == 0:
-                    print('-------------------------------------------------------------', '\n')
-                    print("Silver SS amount: ", scores_ranks[k].text)
-                elif k == 1:
-                    print("Gold SS amount: ", scores_ranks[k].text)
-                elif k == 2:
-                    print("Silver S amount: ", scores_ranks[k].text)
-                elif k == 3:
-                    print("Gold S amount:", scores_ranks[k].text)
-                elif k == 4:
-                    print("A scores amount: ", scores_ranks[k].text, '\n')
-                    print('-------------------------------------------------------------', '\n')
-                k += 1
-            """
+                while k <= 5:
+                    if k == 0:
+                        print('-------------------------------------------------------------', '\n')
+                        print("Silver SS amount: "+scores_ranks[k].text)
+                    elif k == 1:
+                        print("Gold SS amount: "+scores_ranks[k].text)
+                    elif k == 2:
+                        print("Silver S amount: "+scores_ranks[k].text)
+                    elif k == 3:
+                        print("Gold S amount: "+scores_ranks[k].text)
+                    elif k == 4:
+                        print("A scores amount: "+scores_ranks[k].text, '\n')
+                        print('-------------------------------------------------------------', '\n')
+                    k += 1
+            else:
+            	pass
+            
             friends = driver.find_elements_by_class_name("profile-detail-bar__column.profile-detail-bar__column--left") # Amount of followers
-            print('Followers' + '\n' + friends[0].text)
+            print('Followers + Subscribers' + '\n' + friends[0].text)
             print('_____________', '\n')
             level = driver.find_elements_by_class_name("profile-detail-bar__entry.profile-detail-bar__entry--level") # Current level
             print('Level' + '\n' + level[0].text)
@@ -119,6 +112,8 @@ def main():
             driver.quit()
             time.sleep(2)
             main()
+
+
     def compare(): # Compare 2 users ranks
         cls()
         try:
@@ -127,12 +122,12 @@ def main():
             usr1 = input("First username for comparison: ")
             usr2 = input("Second username for comparison: ")
             driver.get("https://osu.ppy.sh/users/" + usr1)
-            driver.implicitly_wait(5)
-            first_rank = driver.find_elements_by_class_name("profile-detail__bottom-right-item")[0].text # Global ranks
+            driver.implicitly_wait(10)
+            first_rank = driver.find_element_by_class_name("profile-detail__bottom-right-item").text # Global ranks
 
             driver.get("https://osu.ppy.sh/users/" + usr2)
             driver.implicitly_wait(5)
-            second_rank = driver.find_elements_by_class_name("profile-detail__bottom-right-item")[0].text # Global ranks
+            second_rank = driver.find_element_by_class_name("profile-detail__bottom-right-item").text # Global ranks
 
             time.sleep(3)
             convert = int(re.sub("\D","",first_rank)) # Convert every number we find to int   
@@ -144,10 +139,10 @@ def main():
             # stupid code to make math
             if convert_sec > convert:
                 res = eval('convert_sec -  convert') 
-                print(usr1, " is ahead by: ", res, " ranks!")
+                print(usr1, "is ahead by:", res, "ranks!")
             else:
                 res = eval('convert - convert_sec')
-                print(usr2, " is ahead by: ", res, " ranks!")
+                print(usr2, "is ahead by:", res, "ranks!")
         except Exception as e:
             print(e)
             driver.quit()
@@ -159,7 +154,7 @@ def main():
 
     # Main menu, thought it would be nice to do this
     time.sleep(5)
-    cls()
+    print("\n","\n","\n")
     print("\n[!]-------------Cool osu! thingy-----------[!]\n[1] Show Scores\n[2] Compare Ranks\n[3] Song Lyrics (Genius.com)\n[0] Exit\n[!]-------------Cool osu! thingy-----------[!]")
     try:
         c = int(input(">"))
