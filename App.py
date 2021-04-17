@@ -1,3 +1,4 @@
+
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -10,7 +11,6 @@ import time
 For some dumb reason, stuff works differently with and without GUI.
 I made this to work with one, so I don't recommend turning it off.
 If stuff works fine, ignore every warning or weird stuff you don't recognize.
-
 Code still sucks"""
 
 PATH = "C:/Program Files (x86)/chromedriver.exe" # I used Chrome, but if you have the driver for other browsers, specify the path here
@@ -18,7 +18,7 @@ PATH = "C:/Program Files (x86)/chromedriver.exe" # I used Chrome, but if you hav
 
 brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
 options = webdriver.ChromeOptions()
-#options.binary_location = brave_path # Uncomment to use Brave Browser
+options.binary_location = brave_path # Uncomment to use Brave Browser
 #options.add_argument("--incognito") # OPTIONAL, remove the first # to enable incognito mode
 options.add_argument('log-level=3')
 options.headless = False
@@ -40,7 +40,7 @@ def main():
         Find = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.CLASS_NAME, "mini_card"))) # Sometimes it loads so slow, the program can't find the top result, giving an error. This will wait a max of 20 seconds for everything to load before proceding.
         Find.click()
         try:
-            lyric = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "lyrics")))
+            lyric = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "Lyrics__Container-sc-1ynbvzw-2")))
             print("[!]------------------Lyrics below------------------[!]","\n",lyric.text)
         except Exception as e:
             print(e)
@@ -187,5 +187,3 @@ def main():
 if __name__ == "__main__":
     cls()
     main()
-
-# Again, I'm still learning python, so if you wanna contribute I would greatly appreciate it
